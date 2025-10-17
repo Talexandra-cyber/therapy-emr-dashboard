@@ -185,33 +185,15 @@
     </style>
 </head>
 <body>
-    <div class="container" data-form-version="1.0.1">
+    <div class="container" data-form-version="1.0.2">
         <div class="header">
             <h1>Therapy EMR/Billing Dashboard</h1>
         </div>
-        
         <div class="workflow-section">
-            <h2>New Claim Workflow Initiation</h2>
-            
-            <div class="workflow-inputs">
-                <div class="form-group">
-                    <label for="audio_upload_input">Upload Session Audio (.mp3, .wav)</label>
-                    <input type="file" id="audio_upload_input" accept=".mp3,.wav" data-field="audio_upload_input" data-section="workflow" data-type="file" data-testid="audio_upload_input">
-                    <div class="hint">Or provide a file URL (for automation):</div>
-                    <input type="text" id="audio_upload_url" placeholder="https://example.com/audio.mp3" data-field="audio_upload_url" data-section="workflow" data-type="url" data-testid="audio_upload_url">
-                </div>
-                
-                <div class="form-group">
-                    <label for="note_upload_input">Upload Final Clinical Note (.pdf, .txt)</label>
-                    <input type="file" id="note_upload_input" accept=".pdf,.txt" data-field="note_upload_input" data-section="workflow" data-type="file" data-testid="note_upload_input">
-                    <div class="hint">Or provide a file URL (for automation):</div>
-                    <input type="text" id="note_upload_url" placeholder="https://example.com/note.pdf" data-field="note_upload_url" data-section="workflow" data-type="url" data-testid="note_upload_url">
-                </div>
-            </div>
-            
+            <h2>Automated Clinical Documentation</h2>
             <div class="workflow-button-container">
                 <button type="button" id="start_workflow_button" class="button-primary" data-testid="start_workflow_button">
-                    Start Agent Workflow
+                    Start Auto-Fill Workflow
                 </button>
             </div>
         </div>
@@ -222,18 +204,22 @@
             <div class="subsection-header">Patient & Session Information</div>
             <div class="form-row">
                 <div class="form-group">
-                    <label for="patient_search">Patient Name/ID Search</label>
-                    <input type="text" id="patient_search" placeholder="e.g., A.B. or 987654" data-field="patient_search" data-section="patient_session" data-type="text" data-testid="patient_search">
+                    <label for="patient_search">Patient Name</label>
+                    <input type="text" id="patient_search" placeholder="e.g., A.B. or John Doe" data-field="patient_search" data-section="patient_session" data-type="text" data-testid="patient_search">
                 </div>
                 <div class="form-group">
-                    <label for="session_date">Session Date</label>
-                    <input type="date" id="session_date" placeholder="YYYY-MM-DD" required aria-required="true" data-field="session_date" data-section="patient_session" data-type="date" data-testid="session_date">
+                    <label for="patient_id">Patient ID</label>
+                    <input type="text" id="patient_id" placeholder="e.g., PT-2024-1001" required aria-required="true" data-field="patient_id" data-section="patient_session" data-type="text" data-testid="patient_id">
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group">
-                    <label for="patient_id">Patient Identifier</label>
-                    <input type="text" id="patient_id" placeholder="e.g., PT-2024-1001" required aria-required="true" data-field="patient_id" data-section="patient_session" data-type="text" data-testid="patient_id">
+                    <label for="session_date">Session Date</label>
+                    <input type="date" id="session_date" placeholder="YYYY-MM-DD" required aria-required="true" data-field="session_date" data-section="patient_session" data-type="date" data-testid="session_date">
+                </div>
+                <div class="form-group">
+                    <label for="provider_name">Clinician Name</label>
+                    <input type="text" id="provider_name" placeholder="e.g., Jane Doe, MD" data-field="provider_name" data-section="patient_session" data-type="text" data-testid="provider_name">
                 </div>
             </div>
 
@@ -577,15 +563,25 @@
                 </div>
             </div>
             
-            <div class="subsection-header">Clinician Information & Finalization</div>
+            <div class="subsection-header">Clinical Signature & Approval</div>
             <div class="form-group">
-                <label for="provider_name">Clinician Name/Provider</label>
-                <input type="text" id="provider_name" placeholder="e.g., Jane Doe, MD" data-field="provider_name" data-section="finalization" data-type="text" data-testid="provider_name">
+                <label for="clinician_signature">Clinician Signature (Electronic Approval)</label>
+                <input type="text" id="clinician_signature" placeholder="Type full name to sign" data-field="clinician_signature" data-section="finalization" data-type="text" data-testid="clinician_signature">
             </div>
-            
-            <button type="button" id="submit_documentation" class="button-submit" data-testid="submit_documentation">
-                Save & Submit Documentation
-            </button>
+            <div class="form-group">
+                <label for="digital_signature">Digital Signature</label>
+                <canvas id="digital_signature" width="600" height="150" style="border: 2px solid #ccc; background: #fff; display: block; width: 100%; max-width: 100%;"></canvas>
+                <button type="button" id="clear_signature" class="button-primary" style="margin-top: 10px; background: #6c757d; border-color: #545b62;" data-testid="clear_signature">Clear Signature</button>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <button type="button" id="submit_documentation" class="button-submit" data-testid="submit_documentation" style="display: inline-block; margin: 0 10px;">
+                    Save & Submit Documentation
+                </button>
+                <button type="button" id="download_pdf" class="button-submit" data-testid="download_pdf" style="display: inline-block; margin: 0 10px; background: #007bff; border-color: #0056b3;">
+                    Download as PDF
+                </button>
+            </div>
         </div>
     </div>
 
@@ -593,7 +589,7 @@
     <script type="application/json" id="emr-manifest">
     {
         "name": "therapy-emr-claim",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "fields": [
             { "id": "audio_upload_input", "type": "file", "selector": "#audio_upload_input", "required": false },
             { "id": "audio_upload_url", "type": "url", "selector": "#audio_upload_url", "required": false },
@@ -638,9 +634,12 @@
             { "id": "group_id", "type": "text", "selector": "#group_id", "required": false },
 
             { "id": "provider_name", "type": "text", "selector": "#provider_name", "required": false },
+            { "id": "clinician_signature", "type": "text", "selector": "#clinician_signature", "required": false },
+            { "id": "digital_signature", "type": "signature", "selector": "#digital_signature", "required": false },
 
             { "id": "start_workflow_button", "type": "button", "selector": "#start_workflow_button", "required": false },
-            { "id": "submit_documentation", "type": "button", "selector": "#submit_documentation", "required": false }
+            { "id": "submit_documentation", "type": "button", "selector": "#submit_documentation", "required": false },
+            { "id": "download_pdf", "type": "button", "selector": "#download_pdf", "required": false }
         ]
     }
     </script>
@@ -648,8 +647,97 @@
     <!-- Automation Bridge -->
     <script>
     (function () {
+        // Signature pad functionality
+        let isDrawing = false;
+        let signatureData = '';
+        
+        function setupSignaturePad() {
+            const canvas = document.getElementById('digital_signature');
+            const clearBtn = document.getElementById('clear_signature');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            
+            function getMousePos(e) {
+                const rect = canvas.getBoundingClientRect();
+                return {
+                    x: e.clientX - rect.left,
+                    y: e.clientY - rect.top
+                };
+            }
+            
+            function getTouchPos(e) {
+                const rect = canvas.getBoundingClientRect();
+                return {
+                    x: e.touches[0].clientX - rect.left,
+                    y: e.touches[0].clientY - rect.top
+                };
+            }
+            
+            // Mouse events
+            canvas.addEventListener('mousedown', (e) => {
+                isDrawing = true;
+                const pos = getMousePos(e);
+                ctx.beginPath();
+                ctx.moveTo(pos.x, pos.y);
+            });
+            
+            canvas.addEventListener('mousemove', (e) => {
+                if (!isDrawing) return;
+                const pos = getMousePos(e);
+                ctx.lineTo(pos.x, pos.y);
+                ctx.stroke();
+                signatureData = canvas.toDataURL();
+            });
+            
+            canvas.addEventListener('mouseup', () => {
+                isDrawing = false;
+            });
+            
+            // Touch events
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                isDrawing = true;
+                const pos = getTouchPos(e);
+                ctx.beginPath();
+                ctx.moveTo(pos.x, pos.y);
+            });
+            
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (!isDrawing) return;
+                const pos = getTouchPos(e);
+                ctx.lineTo(pos.x, pos.y);
+                ctx.stroke();
+                signatureData = canvas.toDataURL();
+            });
+            
+            canvas.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                isDrawing = false;
+            });
+            
+            // Clear button
+            if (clearBtn) {
+                clearBtn.addEventListener('click', () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    signatureData = '';
+                });
+            }
+        }
+        
+        // Initialize signature pad when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', setupSignaturePad);
+        } else {
+            setupSignaturePad();
+        }
+
         const manifestEl = document.getElementById('emr-manifest');
-        const manifest = manifestEl ? JSON.parse(manifestEl.textContent) : { name: "therapy-emr-claim", version: "1.0.1", fields: [] };
+        const manifest = manifestEl ? JSON.parse(manifestEl.textContent) : { name: 'therapy-emr-claim', version: '1.0.2', fields: [] };
 
         function getFieldDefById(fieldId) {
             return manifest.fields.find(f => f.id === fieldId);
@@ -671,9 +759,14 @@
             const values = {};
             manifest.fields.forEach(f => {
                 const type = f.type;
-                if (type === 'radio' && f.selector.includes("risk_level")) {
-                    const checked = qs("input[name='risk_level']:checked");
-                    values["risk_level"] = checked ? checked.value : null;
+                if (type === 'radio' && (f.selector.includes('risk_level') || f.selector.includes('location'))) {
+                    const fieldName = f.selector.includes('risk_level') ? 'risk_level' : 'location';
+                    const checked = qs(`input[name='${fieldName}']:checked`);
+                    values[f.id] = checked ? checked.value : null;
+                    return;
+                }
+                if (type === 'signature') {
+                    values[f.id] = signatureData || '';
                     return;
                 }
                 const el = qs(f.selector);
@@ -682,7 +775,7 @@
                 if (type === 'checkbox') {
                     values[f.id] = !!el.checked;
                 } else if (type === 'file') {
-                    values[f.id] = el.files and el.files.length > 0 ? { hasFile: true, count: el.files.length } : { hasFile: false };
+                    values[f.id] = el.files && el.files.length > 0 ? { hasFile: true, count: el.files.length } : { hasFile: false };
                 } else if (type === 'textarea' || type === 'text' || type === 'date' || type === 'url' || type === 'select') {
                     values[f.id] = el.value ?? '';
                 } else if (type === 'button') {
@@ -699,13 +792,20 @@
                 const def = getFieldDefById(id);
                 if (!def) return;
 
-                if (def.type === 'radio' and def.selector.includes("risk_level")) {
-                    const tgt = qs(`input[name='risk_level'][value='${String(val)}']`);
+                if (def.type === 'radio' && (def.selector.includes('risk_level') || def.selector.includes('location'))) {
+                    const fieldName = def.selector.includes('risk_level') ? 'risk_level' : 'location';
+                    const tgt = qs(`input[name='${fieldName}'][value='${String(val)}']`);
                     if (tgt) {
                         tgt.checked = true;
                         tgt.dispatchEvent(new Event('input', { bubbles: true }));
                         tgt.dispatchEvent(new Event('change', { bubbles: true }));
                     }
+                    return;
+                }
+
+                if (def.type === 'signature') {
+                    // Cannot programmatically set signature, but we can store the data
+                    signatureData = val || '';
                     return;
                 }
 
@@ -724,7 +824,7 @@
                     el.value = val == null ? '' : String(val);
                 }
 
-                if (def.type !== 'button') {
+                if (def.type !== 'button' && def.type !== 'signature') {
                     el.dispatchEvent(new Event('input', { bubbles: true }));
                     el.dispatchEvent(new Event('change', { bubbles: true }));
                 }
@@ -742,8 +842,9 @@
             manifest.fields.forEach(f => {
                 if (!f.required) return;
 
-                if (f.type === 'radio' && f.selector.includes("risk_level")) {
-                    const checked = qs("input[name='risk_level']:checked");
+                if (f.type === 'radio' && (f.selector.includes('risk_level') || f.selector.includes('location'))) {
+                    const fieldName = f.selector.includes('risk_level') ? 'risk_level' : 'location';
+                    const checked = qs(`input[name='${fieldName}']:checked`);
                     if (!checked) errors.push({ id: f.id, message: 'Required' });
                     return;
                 }
@@ -767,7 +868,7 @@
 
         // Wire field change listeners to emit events
         manifest.fields.forEach(f => {
-            const els = f.type === 'radio' ? qsa(f.selector) : [qs(f.selector)];
+            const els = (f.type === 'radio') ? qsa(f.selector) : [qs(f.selector)];
             els.filter(Boolean).forEach(el => {
                 el.addEventListener('change', () => {
                     const allValues = getValues();
@@ -803,6 +904,20 @@
                 try {
                     window.postMessage({ namespace: 'emr', type: 'submitted', payload: { values } }, '*');
                 } catch (e) {}
+            });
+        }
+
+        const downloadPdfBtn = qs('#download_pdf');
+        if (downloadPdfBtn) {
+            downloadPdfBtn.addEventListener('click', () => {
+                const patientName = qs('#patient_search')?.value || 'Unknown';
+                const patientId = qs('#patient_id')?.value || 'Unknown';
+                const sessionDate = qs('#session_date')?.value || new Date().toISOString().split('T')[0];
+
+                const filename = `EMR_${patientId}_${sessionDate}.pdf`;
+
+                alert(`PDF Download:\n\nFilename: ${filename}\n\nNote: Use your browser's Print > Save as PDF option to generate the PDF.`);
+                window.print();
             });
         }
 
